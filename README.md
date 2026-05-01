@@ -1,7 +1,6 @@
 # Kana CLI — command reference
 
-End-user reference for **`kana`**. Behavior is the same for both; examples use **`kana`**.
-
+End-user reference for **`kana`**.
 ---
 
 ## Running `kana` with no subcommand
