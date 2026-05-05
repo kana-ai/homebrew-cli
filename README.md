@@ -1,214 +1,144 @@
-# Kana CLI — command reference
+# Getting started with the Kana CLI
 
-End-user reference for **`kana`**.
-
----
-
-## Running `kana` with no subcommand
-
-Running **`kana`** alone prints:
-
-- Current **workspace (customer)**
-- Current **app** or **module** (and **local clone path**, when saved)
-
-Then it prints **help** (available subcommands).
+The **Kana CLI** is the same tool whether you run **`kana`** (Homebrew) or **`gh kana`** (GitHub CLI extension). Examples below use **`kana`**; substitute **`gh kana`** everywhere if you installed the extension.
 
 ---
 
-## Quick lookup table
+## Install or upgrade
 
-| Command | What it does |
-|--------|----------------|
-| **`kana auth`** | Browser OAuth2 sign-in (`kana:read`, `kana:write`) |
-| **`kana version`** | CLI version and build metadata |
-| **`kana config api-base`** `[url]` | Show or save API base URL |
-| **`kana customer`** | Choose workspace → **`~/.kana/current-customer.json`** |
-| **`kana init`** | Run **`./script/init`** in the local clone of the **current** app or module |
-| **`kana healthcheck`** | Run **`./script/healthcheck`** (alias: **`kana health-check`**) |
-| **`kana publish`** | Run **`./script/publish`** |
-| **`kana upgrade`** | Run **`./script/upgrade`** |
-| **`kana test`** | Run **`./script/test`** |
-| **`kana test clear`** | **`./script/test clear`** |
-| **`kana test reset`** | **`./script/test reset`** |
-| **`kana app create`** `<name>` | Create app; sets **current app** |
-| **`kana app use`** `[name]` | Set **current app**; pick from **all** apps if name omitted; **clones** dev workspace if there is no local checkout (see **`--yes`**) |
-| **`kana app current`** | Print saved working app (friendly names) |
-| **`kana app list`** | List main apps by sidebar section |
-| **`kana app edit`** | Edit external auth / changeable agents |
-| **`kana module create`** `<name>` | Create module; sets **current module** |
-| **`kana module list`** | List modules (module apps) |
-| **`kana module use`** / **`current`** / **`edit`** | Same pattern as **`app`**, using **`current-module.json`** |
-| **`kana delete`** | Remove **current** target’s local dev files; **`--remote`** also deletes in Kana |
-| **`kana app delete`** / **`kana module delete`** | Same; name optional; **`--remote`** for server-side |
+### Homebrew (macOS / Linux)
 
-Repo scripts require a **local clone** and a **current** app or module. Paths resolve from **`~/.kana/current-app.json`** / **`current-module.json`** (**`localRepoPath`**). If you still have a legacy **`current-agent.json`** from an older CLI, it is read until you save a module target again.
+Add the tap once, then install or upgrade the **`kana`** cask:
 
----
+```bash
+brew tap kana-ai/cli
+brew update
+brew install --cask kana-ai/cli/kana
+```
 
-## Auth and configuration
+Upgrade when a new release is out:
 
-### `kana auth`
+```bash
+brew update
+brew upgrade --cask kana-ai/cli/kana
+```
 
-Opens the browser for OAuth. Stores tokens in **`~/.kana/auth.json`**.
+### GitHub CLI extension
 
-### `kana version`
+Install or upgrade the extension from **[kana-ai/gh-kana](https://github.com/kana-ai/gh-kana)** (releases match the same CLI version as Homebrew):
 
-Prints the CLI version (release builds embed git metadata).
+```bash
+gh extension install kana-ai/gh-kana
+```
 
-### `kana config api-base` `[url]`
+If it is already installed, upgrade to the latest release:
 
-- With **no argument**: prints the saved API base URL.
-- With **URL**: saves it to **`~/.kana/config.json`**.
+```bash
+gh extension upgrade kana-ai/gh-kana
+```
 
-**Environment:** **`KANA_API_BASE`** overrides the saved **`apiBaseUrl`** when set.
+Pin a specific version (optional):
 
-### `kana customer`
-
-Interactive picker for workspace (customer). Needed before most API-backed flows when you have not fixed **`--customer-id`**.
+```bash
+gh extension install kana-ai/gh-kana --pin v0.1.0
+```
 
 ---
 
-## Apps
+## Verify the install
 
-### `kana app create <name>`
-
-Creates an app through the same APIs as the web flow.
-
-**Flags:**
-
-| Flag | Meaning |
-|------|---------|
-| **`--yes`** / **`-y`** | Skip confirmation; skip interactive optional build prompt unless **`--prompt`** / **`--no-prompt`** |
-| **`--prompt "…"`** | Optional build / coding prompt |
-| **`--no-prompt`** | Do not send a prompt |
-| **`--customer-id N`** | Workspace customer for **`x-kana-cid`** without **`current-customer.json`** |
-
-If multiple sidebar sections exist and nothing is saved yet, **`--yes`** alone may fail until you pass **`--group-name`** / **`--group`** or run once **without** **`--yes`** so the CLI can save a section hint (**`app-create-scope.json`**).
-
-### `kana app use [name]`
-
-Sets **`~/.kana/current-app.json`**. In Kana, each **orchestrator** row **is** the app (there are no separate “apps inside” another shell).
-
-- **Pick target:** With **no** **`[name]`** and no disambiguating flags, shows **all** main apps in the workspace in **one** numbered list. Each line notes whether there is already a **local checkout** under **`~/.kana/repos/`** or **no local checkout**.
-- **Name / ids:** Pass **`[name]`** or **`--app-name`**, or **`--group-name`** with **`--app-name`**, or **`--group`** with **`--app-id`** (see scope flags).
-- **Clone:** If there is **no** local dev workspace for that app, the CLI asks whether to **download** (same **`clone_app.sh`** flow as create). Declining still saves the **current app** id without **`localRepoPath`**. **`--yes`** / **`-y`** skips the question and clones non-interactively (and skips the post-clone Cursor / Claude prompt, same as **`app create --yes`**).
-
-**Flags:** scope flags (below), **`--yes`** / **`-y`**, **`--customer-id`**.
-
-### `kana app current`
-
-Prints the current app (friendly names for display).
-
-### `kana app list`
-
-Lists **main** apps (not modules), grouped by sidebar section. Each line shows whether the app is already **checked out** under **`~/.kana/repos/`** (or **`localRepoPath`**) or **no local checkout** yet.
-
-### `kana app edit`
-
-Edits external auth and related fields. With no flags, uses **current app** when still valid, otherwise interactive resolution.
-
-**Flags:** scope flags, **`--yes`** (skip save confirmation), **`--customer-id`**.
+```bash
+kana version
+# or
+gh kana version
+```
 
 ---
 
-## Modules
+## Prerequisites on your machine
 
-Commands mirror **`kana app …`** but target modules (module apps) and **`~/.kana/current-module.json`**.
+Before running commands, the CLI checks that **`docker`** and **`jq`** are available on your `PATH`. If something is missing, it can offer to install (for example via Homebrew on macOS). You can answer **no** and install yourself.
 
-### `kana module create <name>`
+- **Optional override:** set **`KANA_SKIP_DEPS_CHECK=1`** to skip this check (automation or minimal environments only).
 
-**Note:** optional interactive **build prompt** is **not** shown for modules; use **`--prompt`** if you want auto-code on create.
-
-Other **`create`** flags match **`kana app create`**.
-
-### `kana module use`, `kana module current`, `kana module list`, `kana module edit`
-
-Same roles as the **`app`** equivalents (**`module use`** lists **all** modules and can clone when there is no checkout, like **`app use`**). **`module list`** shows the same per-row **checked out** / **no local checkout** hints as **`app list`**.
+After you **create** an app or module, the CLI downloads a dev workspace the same way as the web “Clone & open” flow. That step needs **`unzip`** and a working network (it runs a public clone script). In **interactive** mode (no `--yes`), you may be asked whether to open the project in **Cursor**, **Claude Code**, or **skip**.
 
 ---
 
-## Repo scripts (local clone)
+## Typical first-time flow
 
-These run executables under **`script/`** in your project root (**`~/.kana/repos/…`**).
+### 1. Sign in
 
-| Command | Script |
-|---------|--------|
-| **`kana init`** | **`./script/init`** |
-| **`kana healthcheck`** | **`./script/healthcheck`** |
-| **`kana publish`** | **`./script/publish`** |
-| **`kana upgrade`** | **`./script/upgrade`** |
-| **`kana test`** | **`./script/test`** |
-| **`kana test clear`** | **`./script/test clear`** |
-| **`kana test reset`** | **`./script/test reset`** |
+```bash
+kana auth
+```
 
-### `kana init`
+Uses browser OAuth (scopes **`kana:read`** and **`kana:write`**). Tokens are stored under **`~/.kana/`** (see **Configuration files** in [commands.md](commands.md#configuration-files)).
 
-Runs **`./script/init`** for the **current** app or module. When signed in, refreshes **`.auth_token`** at the project root from the API where applicable.
+### 2. Choose a workspace (customer)
 
-**Optional targeting before init:**
+```bash
+kana customer
+```
 
-| Flag | Meaning |
-|------|---------|
-| **`--switch`** | Interactively pick app vs module, then pick resource (**same flow as `use`**) before **`./script/init`** |
-| **`--app <name>`** | Set **current app** by display name, then run **`./script/init`** |
-| **`--module <name>`** | Set **current module** by display name, then run **`./script/init`** |
+If you belong to more than one workspace, pick the one you want. The choice is saved for later commands.
 
-**`--app`** and **`--module`** are mutually exclusive. **`--customer-id`** applies when switching target.
+### 3. Create an app or module
 
----
+**App (main Kana app):**
 
-## Delete
+```bash
+kana app create "My app name"
+```
 
-### `kana delete`
+**Module (module app):**
 
-Targets whatever is in **`current-app.json`** or **`current-module.json`** (the **current** app or module).
+```bash
+kana module create "My module name"
+```
 
-**Flags:**
+You will confirm creation; for **apps**, you can optionally enter a **build prompt** for code generation (leave empty to skip). With **`--yes`**, confirmation (and the optional app prompt, unless you pass **`--prompt`** / **`--no-prompt`**) is skipped.
 
-| Flag | Meaning |
-|------|---------|
-| **`--remote`** | Also delete the app or module in Kana (like the web UI) |
-| **`--yes`** / **`-y`** | Skip confirmation (typical in scripts) |
+After the resource exists in Kana, the CLI **clones the dev workspace** into **`~/.kana/repos/<name>/`**, sets that folder as the **current** app or module, and **runs initialization** (same idea as the web flow).
 
-With **`--yes`**, you must either name the resource (positionals or scope flags) **or** have a matching **current** target saved.
+### 4. Work locally
 
-**Local-only delete** using the saved current target does **not** need **`kana customer`** / API — it uses **`~/.kana/current-*.json`** and removes **`~/.kana/repos/…`**.
+Use the repo under **`~/.kana/repos/…`**. From anywhere, with the **current** app or module set, you can run bundled scripts:
 
-Stopping Docker is **best-effort**: if **`docker compose down`** fails, local folder removal (and **`--remote`**) may still proceed after a warning.
+```bash
+kana init
+kana healthcheck    # alias: kana health-check
+kana publish
+kana upgrade
+kana test           # optional: kana test clear | kana test reset
+```
 
-### `kana app delete` / `kana module delete`
+These run **`./script/…`** inside your local clone. You need a successful clone and a **current** target (set by **create** or **use**). See [commands.md](commands.md) for the full command list.
 
-Same behavior; lets you name an app or module. With **`--remote`**, if that was the **only** app in its sidebar section, the CLI may remove the empty container server-side.
+### 5. Switch between apps or modules
 
----
+```bash
+kana app use
+kana module use
+```
 
-## Scope flags
+With no name, the CLI lists **every** app or module in the workspace and whether you already have a **local checkout**. If you pick (or name) one that is **not** checked out, it **asks** whether to download the dev workspace (same clone as create). Use **`--yes`** to clone without prompting (and to skip the optional Cursor / Claude step after clone).
 
-Use when multiple resources share a display name or when scripting by id.
-
-| Flag | Purpose |
-|------|---------|
-| **`--group-name "Name"`** | Sidebar section name (with **`--app-name`** when needed) |
-| **`--group N`** | Container (**widget_cont**) id |
-| **`--app-id N`** | App or module id (with **`--group`**) |
-| **`--app-name "…"`** | Display name with **`use`**, **`edit`**, **`delete`** |
+You can pass a name: **`kana app use "My app name"`**. When several resources share a name, use **scope flags** — see [Scope flags](commands.md#scope-flags) in [commands.md](commands.md).
 
 ---
 
-## Configuration files
+## Remove local or remote work
 
-Typical paths under **`~/.kana/`**:
+- **Local only** (stop containers, delete **`~/.kana/repos/…`**, clear saved current target when it matches): **`kana delete`** or **`kana app delete`** / **`kana module delete`** without **`--remote`**.
+- **Also delete in Kana:** add **`--remote`** (and usually **`--yes`** in scripts).
 
-| File | Role |
-|------|------|
-| **`config.json`** | **`apiBaseUrl`** (default production host if missing) |
-| **`auth.json`** | OAuth access + refresh tokens |
-| **`current-customer.json`** | Selected customer **`id`** + **`name`** |
-| **`app-create-scope.json`** | Last sidebar-section hint from interactive create/edit |
-| **`current-app.json`** | Current **app** (ids + names + **`localRepoPath`**) |
-| **`current-module.json`** | Current **module** |
-| **`oauth-client.json`** | Registered OAuth client metadata |
+Details: [Delete](commands.md#delete) in [commands.md](commands.md).
 
-Legacy **`current-agent.json`** may still be present from older CLI versions; the CLI reads it when **`current-module.json`** is missing.
+---
 
-Internal ids are stored for API calls; normal command output uses **friendly names**.
+## Command reference
+
+Every command and flag: **[commands.md](commands.md)**.
+
+For scripted usage, prefer **`--yes`**, explicit names or **`--group`** / **`--app-id`**, and **`--customer-id`** when needed — summarized in [commands.md](commands.md).
