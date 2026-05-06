@@ -99,9 +99,9 @@ Lists **main** apps (not modules), grouped by sidebar section. Each line shows w
 
 ### `kana app edit`
 
-Edits external auth, changeable agents, and **external MCP servers** for the selected app’s orchestrator. With no flags, uses **current app** when still valid, otherwise interactive resolution.
+Edits external auth, changeable agents, and **external MCP servers** for the selected app’s orchestrator. **External auth** and **changeable agents** are written to the API as soon as you finish each interactive editor (no separate “save all” step). **MCP** changes save when you perform each add/edit/delete in that submenu. With no flags, uses **current app** when still valid, otherwise interactive resolution.
 
-**Flags:** scope flags, **`--yes`** (skip save confirmation), **`--customer-id`**.
+**Flags:** scope flags, **`--yes`** / **`-y`** (skip the confirmation prompt before those saves), **`--customer-id`**.
 
 ---
 
