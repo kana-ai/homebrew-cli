@@ -23,26 +23,29 @@ Then it prints **help** (available subcommands).
 |--------|----------------|
 | **`kana auth`** | Browser OAuth2 sign-in (`kana:read`, `kana:write`) |
 | **`kana version`** | CLI version and build metadata |
-| **`kana customer`** | Choose workspace → **`~/.kana/current-customer.json`** |
-| **`kana init`** | Run **`./script/init`** in the local clone of the **current** app or module |
-| **`kana healthcheck`** | Run **`./script/healthcheck`** (alias: **`kana health-check`**) |
-| **`kana publish`** | Run **`./script/publish`** |
-| **`kana upgrade`** | Run **`./script/upgrade`** |
-| **`kana test`** | Run **`./script/test`** |
-| **`kana test clear`** | **`./script/test clear`** |
-| **`kana test reset`** | **`./script/test reset`** |
+| **`kana customer`** `[name]` | Choose workspace → **`~/.kana/current-customer.json`** (interactive, or pass **`name`** to pick non-interactively) |
+| **`kana init`** | Start or restart the development environment for the **current** app or module (**`./script/init`**) |
+| **`kana healthcheck`** | Check for sanity over the **current** app or module development state (**`./script/healthcheck`**; alias: **`kana health-check`**) |
+| **`kana publish`** | Publish the **current** state of the app or module as the live version (**`./script/publish`**) |
+| **`kana upgrade`** | Upgrade the app or module to the latest Kana features and definitions (**`./script/upgrade`**) |
+| **`kana test`** | Open the test environment (**`./script/test`**) |
+| **`kana test clear`** | Clear the test environment database (**`./script/test clear`**) |
+| **`kana test reset`** | Reset the test environment database to the live database state (**`./script/test reset`**) |
 | **`kana app create`** `<name>` | Create app; sets **current app** |
 | **`kana app use`** `[name]` | Set **current app**; pick from **all** apps if name omitted; **clones** dev workspace if there is no local checkout (see **`--yes`**) |
 | **`kana app current`** | Print saved working app (friendly names) |
 | **`kana app list`** | List main apps by sidebar section |
-| **`kana app edit`** | Edit external auth / changeable agents / external MCP servers |
+| **`kana app edit`** | Interactive: external auth, linked modules, external MCP servers |
+| **`kana app extern-auth`** `list` \| `add` \| `remove` | Non-interactive external OAuth integrations (type ids) |
+| **`kana app extern-module`** `list` \| `add` \| `remove` | Non-interactive linked modules (datasrc ids); alias: **`kana app module`** |
+| **`kana app mcp`** `list` \| `add` \| `remove` | Non-interactive external MCP servers |
 | **`kana module create`** `<name>` | Create module; sets **current module** |
 | **`kana module list`** | List modules (module apps) |
-| **`kana module use`** / **`current`** / **`edit`** | Same pattern as **`app`**, using **`current-module.json`** |
+| **`kana module use`** / **`current`** / **`edit`** / **`extern-auth`** / **`extern-module`** / **`mcp`** | Same pattern as **`app`**, using **`current-module.json`** (linked modules: alias **`module`**) |
 | **`kana delete`** | Remove **current** target’s local dev files; **`--remote`** also deletes in Kana |
 | **`kana app delete`** / **`kana module delete`** | Same; name optional; **`--remote`** for server-side |
 
-Repo scripts require a **local clone** and a **current** app or module. Paths resolve from **`~/.kana/current-app.json`** / **`current-module.json`** (**`localRepoPath`**). If you still have a legacy **`current-agent.json`** from an older CLI, it is read until you save a module target again.
+Repo scripts require a **local clone** and a **current** app or module. Paths resolve from **`~/.kana/current-app.json`** / **`current-module.json`** (**`localRepoPath`**). Older CLI versions may have stored the module workflow under a different filename in **`~/.kana/`**; that file is still read for migration until **`current-module.json`** is written again.
 
 ---
 
@@ -56,9 +59,11 @@ Opens the browser for OAuth. Stores tokens in **`~/.kana/auth.json`**.
 
 Prints the CLI version (release builds embed git metadata).
 
-### `kana customer`
+### `kana customer [name]`
 
-Interactive picker for workspace (customer). Needed before most API-backed flows when you have not fixed **`--customer-id`**.
+Chooses the workspace (customer) and saves **`~/.kana/current-customer.json`**. With **multiple** workspaces and **no** **`[name]`**, lists numbers and prompts. With **`[name]`**, selects by display name (exact case-insensitive match, else unique prefix or substring).
+
+Needed before most API-backed flows when you have not fixed **`--customer-id`** on each command.
 
 ---
 
@@ -99,9 +104,19 @@ Lists **main** apps (not modules), grouped by sidebar section. Each line shows w
 
 ### `kana app edit`
 
-Edits external auth, changeable agents, and **external MCP servers** for the selected app’s orchestrator. **External auth** and **changeable agents** are written to the API as soon as you finish each interactive editor (no separate “save all” step). **MCP** changes save when you perform each add/edit/delete in that submenu. With no flags, uses **current app** when still valid, otherwise interactive resolution.
+Edits **external auth**, **linked modules** (assignable pool / datasrc selection), and **external MCP servers** for the selected app’s orchestrator row. **External auth** and **linked modules** are written to the API as soon as you finish each interactive editor (no separate “save all” step). **MCP** changes save when you perform each add/edit/delete in that submenu. With no flags, uses **current app** when still valid, otherwise interactive resolution.
 
 **Flags:** scope flags, **`--yes`** / **`-y`** (skip the confirmation prompt before those saves), **`--customer-id`**.
+
+### `kana app extern-auth` and `kana app extern-module`
+
+Non-interactive counterparts of the **`edit`** menu (same targeting flags). **`extern-auth add <typ>`** / **`remove <typ>`** use integration type integers from the server’s external-auth catalog (**`list`** shows enabled types). **`extern-module add <datasrcid>`** / **`remove <datasrcid>`** update linked modules; **`extern-module list`** prints linked datasrc ids and resolved names. The older name **`module`** is still accepted as an alias (e.g. **`kana app module list`**).
+
+Under **`kana module …`**, the nested **`extern-module`** subcommand is **`kana module extern-module list`** (and **`add`** / **`remove`**) — same behavior as **`kana app extern-module …`**, scoped to module orchestrator rows (alias: **`kana module module …`**).
+
+### `kana app mcp` / `kana module mcp`
+
+Non-interactive MCP list/add/remove (see quick table).
 
 ---
 
@@ -137,7 +152,7 @@ These run executables under **`script/`** in your project root (**`~/.kana/repos
 
 ### `kana init`
 
-Runs **`./script/init`** for the **current** app or module. When signed in, refreshes **`.auth_token`** at the project root from the API where applicable.
+Starts or restarts the development environment for the **current** app or module by running **`./script/init`**. When signed in, refreshes **`.auth_token`** at the project root from the API where applicable.
 
 **Optional targeting before init:**
 
@@ -203,6 +218,6 @@ Typical paths under **`~/.kana/`**:
 | **`current-module.json`** | Current **module** |
 | **`oauth-client.json`** | Registered OAuth client metadata |
 
-Legacy **`current-agent.json`** may still be present from older CLI versions; the CLI reads it when **`current-module.json`** is missing.
+Migration: an older module-workflow state file under **`~/.kana/`** may still exist; the CLI reads it when **`current-module.json`** is missing.
 
 Internal ids are stored for API calls; normal command output uses **friendly names**.
