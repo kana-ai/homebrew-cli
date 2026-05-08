@@ -97,13 +97,13 @@ kana app create "My app name"
 kana module create "My module name"
 ```
 
-You will confirm creation; for **apps**, you can optionally enter a **build prompt** for code generation (leave empty to skip). With **`--yes`**, confirmation (and the optional app prompt, unless you pass **`--prompt`** / **`--no-prompt`**) is skipped.
+You will confirm creation; for **apps**, you can optionally enter a **build prompt** for code generation (leave empty to skip). With **`--yes`**, confirmation (and the optional app prompt, unless you pass **`--prompt`**, **`--prompt-file`**, or **`--no-prompt`**) is skipped.
 
-After the resource exists in Kana, the CLI **clones the dev workspace** into **`~/.kana/repos/<name>/`**, sets that folder as the **current** app or module, and **runs initialization** (same idea as the web flow).
+After the resource exists in Kana, the CLI **clones the dev workspace** into **`~/.kana/repos/<name>/`** by default, sets that folder as the **current** app or module, and **runs initialization** (same idea as the web flow). To use a different parent directory for clones, run **`kana config repos-dir`** or set **`KANA_REPOS_DIR`** — see [**`kana config repos-dir`**](commands.md#kana-config-repos-dir) in [commands.md](commands.md).
 
 ### 4. Work locally
 
-Use the repo under **`~/.kana/repos/…`**. From anywhere, with the **current** app or module set, you can run bundled scripts:
+Use the repo under your configured clone root (default **`~/.kana/repos/…`**). From anywhere, with the **current** app or module set, you can run bundled scripts:
 
 ```bash
 kana init

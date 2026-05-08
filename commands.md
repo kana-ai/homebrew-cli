@@ -24,6 +24,7 @@ Then it prints **help** (available subcommands).
 | **`kana auth`** | Browser OAuth2 sign-in (`kana:read`, `kana:write`) |
 | **`kana version`** | CLI version and build metadata |
 | **`kana customer`** `[name]` | Choose workspace → **`~/.kana/current-customer.json`** (interactive, or pass **`name`** to pick non-interactively) |
+| **`kana config repos-dir`** `[path]` | Show or set the root directory for local clones (**`reposDir`** in **`~/.kana/config.json`**); env **`KANA_REPOS_DIR`** overrides when set |
 | **`kana init`** | Start or restart the development environment for the **current** app or module (**`./script/init`**) |
 | **`kana healthcheck`** | Check for sanity over the **current** app or module development state (**`./script/healthcheck`**; alias: **`kana health-check`**) |
 | **`kana publish`** | Publish the **current** state of the app or module as the live version (**`./script/publish`**) |
@@ -65,6 +66,25 @@ Chooses the workspace (customer) and saves **`~/.kana/current-customer.json`**. 
 
 Needed before most API-backed flows when you have not fixed **`--customer-id`** on each command.
 
+### `kana config`
+
+Shows persisted CLI settings in **`~/.kana/config.json`**. The documented subcommand is **`repos-dir`** (see below). Other keys may exist for internal or advanced tooling and are not described in this reference.
+
+### `kana config repos-dir`
+
+Optional argument **`[path]`**. Controls where **`kana app create`**, **`kana app use`**, **`kana module create`**, **`kana module use`**, and related flows put **local dev workspaces** (cloned repos). **`current-app.json`** / **`current-module.json`** store **`localRepoPath`** under this tree.
+
+- **No arguments:** prints **`reposDir`** from **`config.json`** (if any) and the **effective** directory the CLI uses (after env overrides).
+- **With `[path]`:** saves an absolute path as **`reposDir`** in **`config.json`**.
+
+**Precedence** for the effective clone root (highest wins):
+
+1. **`KANA_REPOS_DIR`** when set in the environment  
+2. **`reposDir`** in **`~/.kana/config.json`**  
+3. Default: **`~/.kana/repos`** (or **`<KANA_STATE_DIR>/repos`** when using a custom state directory)
+
+Changing **`reposDir`** does **not** move existing project folders; move them yourself or clone again after switching roots.
+
 ---
 
 ## Apps
@@ -77,8 +97,9 @@ Creates an app through the same APIs as the web flow.
 
 | Flag | Meaning |
 |------|---------|
-| **`--yes`** / **`-y`** | Skip confirmation; skip interactive optional build prompt unless **`--prompt`** / **`--no-prompt`** |
+| **`--yes`** / **`-y`** | Skip confirmation; skip interactive optional build prompt unless **`--prompt`**, **`--prompt-file`**, or **`--no-prompt`** |
 | **`--prompt "…"`** | Optional build / coding prompt |
+| **`--prompt-file <path>`** | Same as **`--prompt`**, but prompt text is read from the file (UTF-8); **`~`** in the path is expanded |
 | **`--no-prompt`** | Do not send a prompt |
 | **`--customer-id N`** | Workspace customer for **`x-kana-cid`** without **`current-customer.json`** |
 
@@ -126,7 +147,7 @@ Commands mirror **`kana app …`** but target modules (module apps) and **`~/.ka
 
 ### `kana module create <name>`
 
-**Note:** optional interactive **build prompt** is **not** shown for modules; use **`--prompt`** if you want auto-code on create.
+**Note:** optional interactive **build prompt** is **not** shown for modules; use **`--prompt`** or **`--prompt-file`** if you want auto-code on create.
 
 Other **`create`** flags match **`kana app create`**.
 
@@ -210,7 +231,7 @@ Typical paths under **`~/.kana/`**:
 
 | File | Role |
 |------|------|
-| **`config.json`** | CLI preferences used for API access (defaults apply when absent) |
+| **`config.json`** | Persisted CLI preferences; **`reposDir`** is the clone root (see **`kana config repos-dir`**) |
 | **`auth.json`** | OAuth access + refresh tokens |
 | **`current-customer.json`** | Selected customer **`id`** + **`name`** |
 | **`app-create-scope.json`** | Last sidebar-section hint from interactive create/edit |
