@@ -103,14 +103,12 @@ Creates an app through the same APIs as the web flow.
 | **`--no-prompt`** | Do not send a prompt |
 | **`--customer-id N`** | Workspace customer for **`x-kana-cid`** without **`current-customer.json`** |
 
-If multiple sidebar sections exist and nothing is saved yet, **`--yes`** alone may fail until you pass **`--group-name`** / **`--group`** or run once **without** **`--yes`** so the CLI can save a section hint (**`app-create-scope.json`**).
-
 ### `kana app use [name]`
 
 Sets **`~/.kana/current-app.json`**. In Kana, each **orchestrator** row **is** the app (there are no separate “apps inside” another shell).
 
 - **Pick target:** With **no** **`[name]`** and no disambiguating flags, shows **all** main apps in the workspace in **one** numbered list. Each line notes whether there is already a **local checkout** under **`~/.kana/repos/`** or **no local checkout**.
-- **Name / ids:** Pass **`[name]`** or **`--app-name`**, or **`--group-name`** with **`--app-name`**, or **`--group`** with **`--app-id`** (see scope flags).
+- **Name / ids:** Pass **`[name]`** or **`--app-name`**, or **`--app-id`** when that id is unique in the workspace (see scope flags).
 - **Clone:** If there is **no** local dev workspace for that app, the CLI asks whether to **download** (same **`clone_app.sh`** flow as create). Declining still saves the **current app** id without **`localRepoPath`**. **`--yes`** / **`-y`** skips the question and clones non-interactively (and skips the post-clone Cursor / Claude prompt, same as **`app create --yes`**).
 
 **Flags:** scope flags (below), **`--yes`** / **`-y`**, **`--customer-id`**.
@@ -214,13 +212,11 @@ Same behavior; lets you name an app or module. With **`--remote`**, if that was 
 
 ## Scope flags
 
-Use when multiple resources share a display name or when scripting by id.
+Use when multiple resources share a display name or when scripting by app/module row id.
 
 | Flag | Purpose |
 |------|---------|
-| **`--group-name "Name"`** | Sidebar section name (with **`--app-name`** when needed) |
-| **`--group N`** | Container (**widget_cont**) id |
-| **`--app-id N`** | App or module id (with **`--group`**) |
+| **`--app-id N`** | App or module row id (**`widgetappid`**) — must be unique across the workspace |
 | **`--app-name "…"`** | Display name with **`use`**, **`edit`**, **`delete`** |
 
 ---

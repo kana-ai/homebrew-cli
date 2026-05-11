@@ -141,4 +141,4 @@ Details: [Delete](commands.md#delete) in [commands.md](commands.md).
 
 Every command and flag: **[commands.md](commands.md)**.
 
-For scripted usage, prefer **`--yes`**, explicit names or **`--group`** / **`--app-id`**, and **`--customer-id`** when needed — summarized in [commands.md](commands.md).
+For scripted usage, prefer **`--yes`**, explicit names or **`--app-id`** when unique in the workspace, and **`--customer-id`** when needed — summarized in [commands.md](commands.md).
