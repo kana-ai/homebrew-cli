@@ -61,7 +61,7 @@ Before running commands, the CLI checks that **`docker`** and **`jq`** are avail
 
 - **Optional override:** set **`KANA_SKIP_DEPS_CHECK=1`** to skip this check (automation or minimal environments only).
 
-After you **create** an app or module, the CLI downloads a dev workspace the same way as the web “Clone & open” flow. That step needs **`unzip`** and a working network (it runs a public clone script). In **interactive** mode (no `--yes`), you may be asked whether to open the project in **Cursor**, **Claude Code**, or **skip**.
+After you **create** an app or module, the CLI downloads a dev workspace the same way as the web “Clone & open” flow. That step needs **`unzip`** and a working network (it runs a public clone script). In **interactive** mode (no `--yes`), you may be asked whether to open the project in **Cursor**, **Claude Code** (in a **new** terminal window so Claude gets a normal TTY), or **skip**.
 
 ---
 
@@ -122,7 +122,7 @@ kana app use
 kana module use
 ```
 
-With no name, the CLI lists **every** app or module in the workspace and whether you already have a **local checkout**. If you pick (or name) one that is **not** checked out, it **asks** whether to download the dev workspace (same clone as create). Use **`--yes`** to clone without prompting (and to skip the optional Cursor / Claude step after clone).
+With no name, the CLI lists **every** app or module in the workspace and whether you already have a **local checkout**. If you pick (or name) one that is **not** checked out, it **asks** whether to download the dev workspace (same clone as create). If you pick one that **is** already checked out, it can offer **Cursor** / **Claude Code** / **skip** again. Use **`--yes`** to skip those prompts (clone without asking, and no editor offer after **`use`**).
 
 You can pass a name: **`kana app use "My app name"`**. When several resources share a name, use **scope flags** — see [Scope flags](commands.md#scope-flags) in [commands.md](commands.md).
 

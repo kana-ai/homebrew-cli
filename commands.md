@@ -33,7 +33,7 @@ Then it prints **help** (available subcommands).
 | **`kana test clear`** | Clear the test environment database (**`./script/test clear`**) |
 | **`kana test reset`** | Reset the test environment database to the live database state (**`./script/test reset`**) |
 | **`kana app create`** `<name>` | Create app; sets **current app** |
-| **`kana app use`** `[name]` | Set **current app**; pick from **all** apps if name omitted; **clones** dev workspace if there is no local checkout (see **`--yes`**) |
+| **`kana app use`** `[name]` | Set **current app**; pick from **all** apps if name omitted; **clones** if there is no local checkout; with a checkout, offers **Cursor** / **Claude** / **skip** unless **`--yes`** |
 | **`kana app current`** | Print saved working app (friendly names) |
 | **`kana app list`** | List main apps by sidebar section |
 | **`kana app edit`** | Interactive: external auth, linked modules, external MCP servers |
@@ -109,7 +109,8 @@ Sets **`~/.kana/current-app.json`**. In Kana, each **orchestrator** row **is** t
 
 - **Pick target:** With **no** **`[name]`** and no disambiguating flags, shows **all** main apps in the workspace in **one** numbered list. Each line notes whether there is already a **local checkout** under **`~/.kana/repos/`** or **no local checkout**.
 - **Name / ids:** Pass **`[name]`** or **`--app-name`**, or **`--app-id`** when that id is unique in the workspace (see scope flags).
-- **Clone:** If there is **no** local dev workspace for that app, the CLI asks whether to **download** (same **`clone_app.sh`** flow as create). Declining still saves the **current app** id without **`localRepoPath`**. **`--yes`** / **`-y`** skips the question and clones non-interactively (and skips the post-clone Cursor / Claude prompt, same as **`app create --yes`**).
+- **Clone:** If there is **no** local dev workspace for that app, the CLI asks whether to **download** (same **`clone_app.sh`** flow as create). Declining still saves the **current app** id without **`localRepoPath`**. **`--yes`** / **`-y`** skips the question and clones non-interactively (and skips editor open prompts, same as **`app create --yes`**). After clone, **Claude Code** is opened in a **new** system terminal window (not the current shell).
+- **Editor prompt:** When you already have a **local checkout** for the app you picked, the CLI still offers **Cursor**, **Claude Code**, or **skip** (same as after a fresh clone), unless you passed **`--yes`** / **`-y`**.
 
 **Flags:** scope flags (below), **`--yes`** / **`-y`**, **`--customer-id`**.
 
@@ -151,7 +152,7 @@ Other **`create`** flags match **`kana app create`**.
 
 ### `kana module use`, `kana module current`, `kana module list`, `kana module edit`
 
-Same roles as the **`app`** equivalents (**`module use`** lists **all** modules and can clone when there is no checkout, like **`app use`**). **`module list`** shows the same per-row **checked out** / **no local checkout** hints as **`app list`**.
+Same roles as the **`app`** equivalents (**`module use`** lists **all** modules and can clone when there is no checkout, like **`app use`**; with a local checkout it offers **Cursor** / **Claude Code** / **skip** unless **`--yes`**). **`module list`** shows the same per-row **checked out** / **no local checkout** hints as **`app list`**.
 
 ---
 
