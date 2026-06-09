@@ -108,7 +108,8 @@ Use the repo under your configured clone root (default **`~/.kana/repos/…`**).
 ```bash
 kana init
 kana healthcheck    # alias: kana health-check
-kana publish
+kana push           # push current source to the test environment
+kana publish        # production release (distinct from push)
 kana upgrade
 kana test           # optional: kana test clear | kana test reset
 ```

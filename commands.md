@@ -27,7 +27,8 @@ Then it prints **help** (available subcommands).
 | **`kana config repos-dir`** `[path]` | Show or set the root directory for local clones (**`reposDir`** in **`~/.kana/config.json`**); env **`KANA_REPOS_DIR`** overrides when set |
 | **`kana init`** | Start or restart the development environment for the **current** app or module (**`./script/init`**) |
 | **`kana healthcheck`** | Check for sanity over the **current** app or module development state (**`./script/healthcheck`**; alias: **`kana health-check`**) |
-| **`kana publish`** | Publish the **current** state of the app or module as the live version (**`./script/publish`**) |
+| **`kana push`** | Push the **current** state of the app or module to the **test environment** (**`./script/push`**, which wraps **`./script/test --push`**). Distinct from **`kana publish`** below. |
+| **`kana publish`** | Publish the **current** state of the app or module as the live (**production**) version (**`./script/publish`**) |
 | **`kana upgrade`** | Upgrade the app or module to the latest Kana features and definitions (**`./script/upgrade`**) |
 | **`kana test`** | Open the test environment (**`./script/test`**) |
 | **`kana test clear`** | Clear the test environment database (**`./script/test clear`**) |
@@ -164,7 +165,8 @@ These run executables under **`script/`** in your project root (**`~/.kana/repos
 |---------|--------|
 | **`kana init`** | **`./script/init`** |
 | **`kana healthcheck`** | **`./script/healthcheck`** |
-| **`kana publish`** | **`./script/publish`** |
+| **`kana push`** | **`./script/push`** (wrapper around **`./script/test --push`** — pushes to the test environment) |
+| **`kana publish`** | **`./script/publish`** (production release — distinct from **`kana push`**) |
 | **`kana upgrade`** | **`./script/upgrade`** |
 | **`kana test`** | **`./script/test`** |
 | **`kana test clear`** | **`./script/test clear`** |
