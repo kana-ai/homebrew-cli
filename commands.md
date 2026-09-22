@@ -27,14 +27,14 @@ Then it prints **help** (available subcommands).
 | **`kana config repos-dir`** `[path]` | Show or set the root directory for local clones (**`reposDir`** in **`~/.kana/config.json`**); env **`KANA_REPOS_DIR`** overrides when set |
 | **`kana init`** | Start or restart the development environment for the **current** app or module (**`./script/init`**) |
 | **`kana healthcheck`** | Check for sanity over the **current** app or module development state (**`./script/healthcheck`**; alias: **`kana health-check`**) |
-| **`kana push`** | Push the **current** state of the app or module to the **test environment** (**`./script/push`**, which wraps **`./script/test --push`**). Distinct from **`kana publish`** below. |
-| **`kana publish`** | Publish the **current** state of the app or module as the live (**production**) version (**`./script/publish`**) |
-| **`kana upgrade`** | Upgrade the app or module to the latest Kana features and definitions (**`./script/upgrade`**) |
+| **`kana push`** `"<summary>"` | Commit the working tree, push your branch, build, and deploy to **your test environment** (**`./script/push "<summary>"`**). Distinct from **`kana publish`** below. |
+| **`kana publish`** | Upgrade, then fast-forward **`main`** to your commit so it becomes the live (**production**) version (**`./script/publish`**; **`--continue`** skips the verify stop) |
+| **`kana sync_workspace`** | Merge your branch from the server and then **`main`** into the workspace, refresh the template files, and push the result unless there is nothing new (**`./script/sync_workspace`**) |
 | **`kana test`** | Open the test environment (**`./script/test`**) |
 | **`kana test clear`** | Clear the test environment database (**`./script/test clear`**) |
 | **`kana test reset`** | Reset the test environment database to the live database state (**`./script/test reset`**) |
 | **`kana app create`** `<name>` | Create app; sets **current app** |
-| **`kana app use`** `[name]` | Set **current app**; pick from **all** apps if name omitted; **clones** if there is no local checkout; with a checkout, offers **Cursor** / **Claude** / **skip** unless **`--yes`** |
+| **`kana app use`** `[name]` | Set **current app**; pick from **all** apps if name omitted; **clones** if there is no local checkout; with a checkout, offers **Codex** / **Claude CLI** / **VS Code** / **Cursor** / **skip** unless **`--yes`** |
 | **`kana app current`** | Print saved working app (friendly names) |
 | **`kana app list`** | List main apps by sidebar section |
 | **`kana app edit`** | Interactive: external auth, linked modules, external MCP servers |
@@ -47,7 +47,7 @@ Then it prints **help** (available subcommands).
 | **`kana delete`** | Remove **current** target’s local dev files; **`--remote`** also deletes in Kana |
 | **`kana app delete`** / **`kana module delete`** | Same; name optional; **`--remote`** for server-side |
 
-Repo scripts require a **local clone** and a **current** app or module. Paths resolve from **`~/.kana/current-app.json`** / **`current-module.json`** (**`localRepoPath`**). Older CLI versions may have stored the module workflow under a different filename in **`~/.kana/`**; that file is still read for migration until **`current-module.json`** is written again.
+Repo scripts require a **local clone** (a git repository, checked out on a branch named after your email) and a **current** app or module. Paths resolve from **`~/.kana/current-app.json`** / **`current-module.json`** (**`localRepoPath`**). Older CLI versions may have stored the module workflow under a different filename in **`~/.kana/`**; that file is still read for migration until **`current-module.json`** is written again.
 
 ---
 
@@ -110,8 +110,8 @@ Sets **`~/.kana/current-app.json`**. In Kana, each **orchestrator** row **is** t
 
 - **Pick target:** With **no** **`[name]`** and no disambiguating flags, shows **all** main apps in the workspace in **one** numbered list. Each line notes whether there is already a **local checkout** under **`~/.kana/repos/`** or **no local checkout**.
 - **Name / ids:** Pass **`[name]`** or **`--app-name`**, or **`--app-id`** when that id is unique in the workspace (see scope flags).
-- **Clone:** If there is **no** local dev workspace for that app, the CLI asks whether to **download** (same **`clone_app.sh`** flow as create). Declining still saves the **current app** id without **`localRepoPath`**. **`--yes`** / **`-y`** skips the question and clones non-interactively (and skips editor open prompts, same as **`app create --yes`**). After clone, **Claude Code** is opened in a **new** system terminal window (not the current shell).
-- **Editor prompt:** When you already have a **local checkout** for the app you picked, the CLI still offers **Cursor**, **Claude Code**, or **skip** (same as after a fresh clone), unless you passed **`--yes`** / **`-y`**.
+- **Clone:** If there is **no** local dev workspace for that app, the CLI asks whether to **clone** it (same **`clone_app.sh`** flow as create: a git clone of the app's repository on a branch named after your email). Declining still saves the **current app** id without **`localRepoPath`**. **`--yes`** / **`-y`** skips the question and clones non-interactively (and skips editor open prompts, same as **`app create --yes`**). After clone, the editor prompt below is offered; a terminal agent you pick there (**Claude CLI**, or **Codex** when no Codex desktop app is installed) opens in a **new** system terminal window, not the current shell.
+- **Editor prompt:** When you already have a **local checkout** for the app you picked, the CLI still offers **Codex**, **Claude CLI**, **VS Code**, **Cursor**, or **skip** (same as after a fresh clone), unless you passed **`--yes`** / **`-y`**.
 
 **Flags:** scope flags (below), **`--yes`** / **`-y`**, **`--customer-id`**.
 
@@ -153,7 +153,7 @@ Other **`create`** flags match **`kana app create`**.
 
 ### `kana module use`, `kana module current`, `kana module list`, `kana module edit`
 
-Same roles as the **`app`** equivalents (**`module use`** lists **all** modules and can clone when there is no checkout, like **`app use`**; with a local checkout it offers **Cursor** / **Claude Code** / **skip** unless **`--yes`**). **`module list`** shows the same per-row **checked out** / **no local checkout** hints as **`app list`**.
+Same roles as the **`app`** equivalents (**`module use`** lists **all** modules and can clone when there is no checkout, like **`app use`**; with a local checkout it offers **Codex** / **Claude CLI** / **VS Code** / **Cursor** / **skip** unless **`--yes`**). **`module list`** shows the same per-row **checked out** / **no local checkout** hints as **`app list`**.
 
 ---
 
@@ -165,9 +165,9 @@ These run executables under **`script/`** in your project root (**`~/.kana/repos
 |---------|--------|
 | **`kana init`** | **`./script/init`** |
 | **`kana healthcheck`** | **`./script/healthcheck`** |
-| **`kana push`** | **`./script/push`** (wrapper around **`./script/test --push`** — pushes to the test environment) |
-| **`kana publish`** | **`./script/publish`** (production release — distinct from **`kana push`**) |
-| **`kana upgrade`** | **`./script/upgrade`** |
+| **`kana push`** `"<summary>"` | **`./script/push "<summary>"`** (commit, push your branch, build, deploy to your test environment) |
+| **`kana publish`** | **`./script/publish`** (sync, then fast-forward **`main`** — production; distinct from **`kana push`**) |
+| **`kana sync_workspace`** | **`./script/sync_workspace`** (merge your branch from the server, then **`main`**; refresh the template files; push) |
 | **`kana test`** | **`./script/test`** |
 | **`kana test clear`** | **`./script/test clear`** |
 | **`kana test reset`** | **`./script/test reset`** |
@@ -185,6 +185,50 @@ Starts or restarts the development environment for the **current** app or module
 | **`--module <name>`** | Set **current module** by display name, then run **`./script/init`** |
 
 **`--app`** and **`--module`** are mutually exclusive. **`--customer-id`** applies when switching target.
+
+### `kana push "<summary>"`
+
+Runs **`./script/push "<summary>"`** in the local clone: commits the working tree (the summary is the commit message and labels the revision in the app's history), pushes your branch (named after your email) to the app's git repository, builds the app bundle, and deploys it to **your own** test environment. It never touches **`main`**. The summary is required by the script; without it the script prints its usage and exits **2**.
+
+**Exit codes** (the script's own, passed through unchanged):
+
+| Code | Meaning |
+|------|---------|
+| **0** | Pushed and deployed |
+| **1** | Error (lint, build, upload, …) |
+| **6** | Your branch on the server has newer commits from another workspace (for example a web-hosted vibe-dev session): run **`kana sync_workspace`** to merge them, then push again |
+
+**`--force`** is still accepted for compatibility but ignored (the CLI says so): pushes are never forced.
+
+### `kana publish`
+
+Runs **`./script/publish`** in the local clone: first the workspace sync (merges your branch from the server, then **`main`**, into it and refreshes the template files) and a push of the result to your test environment; then it fast-forwards **`main`** to your commit and makes that revision live.
+
+| Flag | Meaning |
+|------|---------|
+| **`--continue`** | Forwarded as **`./script/publish --continue`**: publish even when the sync merged new commits from **`main`** (skips the exit-4 stop below) |
+
+**Exit codes** (the script's own, passed through unchanged):
+
+| Code | Meaning |
+|------|---------|
+| **0** | Published |
+| **1** | Error |
+| **3** | Conflicts, either merging or putting your uncommitted changes back: the script's report lists the files and the exact `git` commands to finish, and says whether **`kana publish`** has to be run again |
+| **4** | Merged changes from **`main`** and deployed them to your test environment; verify, then run **`kana publish`** again (it publishes as long as **`main`** has not changed again) |
+| **5** | **`main`** changed since your sync; run **`kana publish`** again to merge the new commits |
+
+### `kana sync_workspace`
+
+Runs **`./script/sync_workspace`** in the local clone: merges your branch from the server (commits made in a web-hosted vibe-dev session or on another machine), then **`main`**, into the workspace, refreshes the template files, commits, and pushes the result to your test environment. The push is skipped when the server already has every commit and your test environment was built from it ("Nothing new to push").
+
+**Exit codes** (the script's own, passed through unchanged):
+
+| Code | Meaning |
+|------|---------|
+| **0** | Upgraded |
+| **1** | Error |
+| **3** | Conflicts, either merging or putting your uncommitted changes back: the script's report lists the files and the exact `git` commands to finish, and says whether **`kana sync_workspace`** has to be run again |
 
 ---
 

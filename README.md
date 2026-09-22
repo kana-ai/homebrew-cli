@@ -57,11 +57,11 @@ gh kana version
 
 ## Prerequisites on your machine
 
-Before running commands, the CLI checks that **`docker`** and **`jq`** are available on your `PATH`. If something is missing, it can offer to install (for example via Homebrew on macOS). You can answer **no** and install yourself.
+Before running commands, the CLI checks that **`docker`**, **`jq`**, and **`git`** are available on your `PATH`. If something is missing, it can offer to install (for example via Homebrew on macOS). You can answer **no** and install yourself.
 
 - **Optional override:** set **`KANA_SKIP_DEPS_CHECK=1`** to skip this check (automation or minimal environments only).
 
-After you **create** an app or module, the CLI downloads a dev workspace the same way as the web “Clone & open” flow. That step needs **`unzip`** and a working network (it runs a public clone script). In **interactive** mode (no `--yes`), you may be asked whether to open the project in **Cursor**, **Claude Code** (in a **new** terminal window so Claude gets a normal TTY), or **skip**.
+After you **create** an app or module, the CLI clones the dev workspace the same way as the web “Clone & develop” flow: a **git clone** of the app's repository, checked out on a **branch named after your email**. That step needs **`git`**, **`unzip`**, and a working network (it runs a public clone script). In **interactive** mode (no `--yes`), you may be asked whether to open the project in **Codex**, **Claude CLI** (in a **new** terminal window so Claude gets a normal TTY), **VS Code**, **Cursor**, or **skip** — the same editors as the web UI's Clone & develop buttons.
 
 ---
 
@@ -107,14 +107,14 @@ Use the repo under your configured clone root (default **`~/.kana/repos/…`**).
 
 ```bash
 kana init
-kana healthcheck    # alias: kana health-check
-kana push           # push current source to the test environment
-kana publish        # production release (distinct from push)
-kana upgrade
-kana test           # optional: kana test clear | kana test reset
+kana healthcheck          # alias: kana health-check
+kana push "<summary>"     # commit, push your branch, build, deploy to your test environment
+kana sync_workspace       # merge your branch from the server, then main; refresh the template; push
+kana publish              # sync, then fast-forward main = the live (production) version
+kana test                 # optional: kana test clear | kana test reset
 ```
 
-These run **`./script/…`** inside your local clone. You need a successful clone and a **current** target (set by **create** or **use**). See [commands.md](commands.md) for the full command list.
+These run **`./script/…`** inside your local clone. You need a successful clone and a **current** target (set by **create** or **use**). Your workspace is a git clone on your own branch (named after your email); you never push to **`main`** directly — **`kana publish`** fast-forwards it for you. The scripts' exit codes are passed through unchanged: **`kana sync_workspace`** exits **3** on conflicts, either merging or putting your uncommitted changes back (its report lists the files and the `git` commands, and says whether to run it again); **`kana publish`** exits **4** after it merged changes from **`main`** and deployed them to your test environment (verify, then run **`kana publish`** again — or pass **`--continue`** to skip that stop) and **5** when **`main`** changed since your sync (run **`kana publish`** again); **`kana push`** exits **6** when your branch on the server moved (run **`kana sync_workspace`**, then push again). See [commands.md](commands.md) for the full command list.
 
 ### 5. Switch between apps or modules
 
@@ -123,7 +123,7 @@ kana app use
 kana module use
 ```
 
-With no name, the CLI lists **every** app or module in the workspace and whether you already have a **local checkout**. If you pick (or name) one that is **not** checked out, it **asks** whether to download the dev workspace (same clone as create). If you pick one that **is** already checked out, it can offer **Cursor** / **Claude Code** / **skip** again. Use **`--yes`** to skip those prompts (clone without asking, and no editor offer after **`use`**).
+With no name, the CLI lists **every** app or module in the workspace and whether you already have a **local checkout**. If you pick (or name) one that is **not** checked out, it **asks** whether to clone the dev workspace (same clone as create). If you pick one that **is** already checked out, it can offer **Codex** / **Claude CLI** / **VS Code** / **Cursor** / **skip** again. Use **`--yes`** to skip those prompts (clone without asking, and no editor offer after **`use`**).
 
 You can pass a name: **`kana app use "My app name"`**. When several resources share a name, use **scope flags** — see [Scope flags](commands.md#scope-flags) in [commands.md](commands.md).
 
