@@ -37,13 +37,23 @@ Then it prints **help** (available subcommands).
 | **`kana app use`** `[name]` | Set **current app**; pick from **all** apps if name omitted; **clones** if there is no local checkout; with a checkout, offers **Codex** / **Claude CLI** / **VS Code** / **Cursor** / **skip** unless **`--yes`** |
 | **`kana app current`** | Print saved working app (friendly names) |
 | **`kana app list`** | List main apps by sidebar section |
-| **`kana app edit`** | Interactive: external auth, linked modules, external MCP servers |
+| **`kana app edit`** | Interactive: external auth, linked modules, MCP, managed DBs, features, billing, access, A2A |
 | **`kana app extern-auth`** `list` \| `add` \| `remove` | Non-interactive external OAuth integrations (type ids) |
 | **`kana app extern-module`** `list` \| `add` \| `remove` | Non-interactive linked modules (datasrc ids); alias: **`kana app module`** |
 | **`kana app mcp`** `list` \| `add` \| `remove` | Non-interactive external MCP servers |
+| **`kana app managed-db`** `list` \| `add` \| `remove` \| `wipe` | Managed DBs (sqlite3 / BigQuery); aliases: **`managed-dbs`**, **`db`** |
+| **`kana app features`** `list` \| `enable` \| `disable` | Optional sym-skills feature toggles |
+| **`kana app billing`** `get` \| `set` \| `portal` | Stripe Pricing Table IDs + Customer Portal |
+| **`kana app access`** `get` \| `set` \| `users` | Access & Sharing (company / restricted / public) |
+| **`kana app a2a`** `status` \| `broadcast` \| `agents …` | A2A broadcast and linked agents |
+| **`kana app slack`** `status` \| `connect` \| `disconnect` | Slack workspace OAuth |
+| **`kana app schedule`** `list` \| `add` \| `mod` \| `del` \| `run` \| `system …` | Prompt + system schedules |
+| **`kana app connection`** `datasrc` \| `config` \| `refs-check` \| `keys` | Connection datasrcs / config (beyond extern-auth) |
+| **`kana app extension`** `list` \| `create` \| `delete` | App extensions |
+| **`kana app tile`** `set` \| `clear-icon` | Tile name / desc / bgcolor / icon |
 | **`kana module create`** `<name>` | Create module; sets **current module** |
 | **`kana module list`** | List modules (module apps) |
-| **`kana module use`** / **`current`** / **`edit`** / **`extern-auth`** / **`extern-module`** / **`mcp`** | Same pattern as **`app`**, using **`current-module.json`** (linked modules: alias **`module`**) |
+| **`kana module use`** / **`current`** / **`edit`** / settings commands | Same pattern as **`app`**, using **`current-module.json`** |
 | **`kana delete`** | Remove **current** target’s local dev files; **`--remote`** also deletes in Kana |
 | **`kana app delete`** / **`kana module delete`** | Same; name optional; **`--remote`** for server-side |
 
@@ -125,7 +135,7 @@ Lists **main** apps (not modules), grouped by sidebar section. Each line shows w
 
 ### `kana app edit`
 
-Edits **external auth**, **linked modules** (assignable pool / datasrc selection), and **external MCP servers** for the selected app’s orchestrator row. **External auth** and **linked modules** are written to the API as soon as you finish each interactive editor (no separate “save all” step). **MCP** changes save when you perform each add/edit/delete in that submenu. With no flags, uses **current app** when still valid, otherwise interactive resolution.
+Edits App Settings slices for the selected app’s orchestrator row: **external auth**, **linked modules**, **external MCP servers**, **managed DBs**, **features**, **billing**, **Access & Sharing**, and **A2A**. **External auth** and **linked modules** are written to the API as soon as you finish each interactive editor (no separate “save all” step). Other submenus save when you perform each change. With no flags, uses **current app** when still valid, otherwise interactive resolution.
 
 **Flags:** scope flags, **`--yes`** / **`-y`** (skip the confirmation prompt before those saves), **`--customer-id`**.
 
@@ -139,6 +149,118 @@ Under **`kana module …`**, the nested **`extern-module`** subcommand is **`kan
 
 Non-interactive MCP list/add/remove (see quick table).
 
+### `kana app managed-db` / `kana module managed-db`
+
+Non-interactive managed databases (same APIs as App Settings → Managed DBs). Aliases: **`managed-dbs`**, **`db`**.
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`list`** | List managed DBs (`service_id`, name, engine, table count, default/removable) |
+| **`add <sqlite3\|bigquery>`** | Add an extra managed DB (`sqlite` / `bq` accepted as aliases) |
+| **`remove <service_id>`** | Delete a removable DB (default sqlite3 cannot be removed; extra sqlite must have zero tables) |
+| **`wipe [service_id]`** | Wipe DB contents (DBs stay; schema returns from **`dbs.json`** on next run). Omit **`service_id`** to wipe all. **`--prod`** (default true) / **`--test-env`** select which copies |
+
+Destructive **`remove`** / **`wipe`** confirm unless **`--yes`**.
+
+### `kana app features` / `kana module features`
+
+Optional sym-skills feature toggles (App Settings → Services & Features).
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`list`** | Available features with on/off state (library installs are locked) |
+| **`enable <feature_id>`** | Enable one feature |
+| **`disable <feature_id>`** | Disable one feature |
+
+### `kana app billing` / `kana module billing`
+
+Stripe Pricing Table IDs (App Settings → Billing). Setting requires the app developer.
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`get`** | Show live/test pricing table IDs and purchase flags (aliases: **`show`**, **`list`**) |
+| **`set`** | **`--live`** / **`--test`** to set; **`--clear-live`** / **`--clear-test`** to clear |
+| **`portal`** | Mint Stripe Customer Portal URL (**`--test`**, **`--open`**) |
+
+### `kana app slack` / `kana module slack`
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`status`** | Workspace connection + personal link flags |
+| **`connect`** | Print/open Slack OAuth URL; poll until connected (**`--open`**, **`--timeout`**) |
+| **`disconnect`** | Disconnect workspace |
+
+### `kana app schedule` / `kana module schedule`
+
+Prompt schedules (`schedules_*`) and system schedules (`app_sched_*`).
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`list`** / **`add`** / **`mod`** / **`del`** / **`run`** | Prompt schedules CRUD + run-now |
+| **`system list`** / **`enable`** / **`disable`** / **`run <name>`** | System schedules + process runner |
+
+### `kana app connection` / `kana module connection`
+
+Extras beyond **`extern-auth`** (toggle still uses **`extern-auth`**).
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`datasrc add\|del`** | Extra warehouse/Gmail datasrcs |
+| **`refs-check`** | Whether source references a connection |
+| **`config get\|set`** | App-level `configuration_required` values |
+| **`keys`** | Workspace Keys configured status |
+
+### `kana app extension` / `kana module extension`
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`list`** | Extensions of the target |
+| **`create <name>`** | Create extension (**`--desc`**, **`--prompt`**) |
+| **`delete <widgetcontid>`** | Delete extension |
+
+### `kana app tile` / `kana module tile`
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`set`** | **`--bgcolor`**, **`--icon <file>`**, **`--name`**, **`--desc`** |
+| **`clear-icon`** | Clear thumb icon |
+
+### `kana app access` / `kana module access`
+
+Access & Sharing (company / restricted / public).
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`get`** | Show level, users (restricted), wckey / auth typ (public), A2A broadcast, library privacy |
+| **`users`** | List workspace users (`userid` + email) for Restricted **`--user`** |
+| **`set`** | Partial update — see flags below |
+
+**`access set` flags** (omit any flag to leave that field unchanged):
+
+| Flag | Meaning |
+|------|---------|
+| **`--level company\|restricted\|public`** | Access level |
+| **`--user <id\|email>`** | Restricted allow-list (repeatable; replaces the list). Leaving Restricted for another level clears the list |
+| **`--wckey`** / **`--gen-wckey`** | Public share-link token (or generate a new one) |
+| **`--auth-typ global\|user`** | Public auth mode |
+| **`--user-typ auto\|external`** | When **`auth-typ=user`** |
+| **`--name`** / **`--desc`** | Display name / tile description |
+| **`--lib-private`** / **`--clear-lib-private`** | Library visibility (requires libop) |
+
+Switching to **public** without a stored wckey auto-generates one.
+
+### `kana app a2a` / `kana module a2a`
+
+A2A broadcast and linked agents (App Settings → MCP & A2A).
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`status`** | Broadcast on/off + linked agents |
+| **`broadcast on\|off`** | Toggle broadcasting this app as an A2A agent (off also drops inbound links) |
+| **`agents list`** | Agents linked to this app |
+| **`agents available`** | Workspace apps currently broadcasting |
+| **`agents add\|remove <widgetcontid>`** | Link / unlink one agent |
+| **`agents set [widgetcontid…]`** | Full replace of the linked set (no ids = clear) |
 ---
 
 ## Modules
