@@ -45,6 +45,7 @@ Then it prints **help** (available subcommands).
 | **`kana app features`** `list` \| `enable` \| `disable` | Optional sym-skills feature toggles |
 | **`kana app billing`** `get` \| `set` \| `portal` | Stripe Pricing Table IDs + Customer Portal |
 | **`kana app access`** `get` \| `set` \| `users` | Access & Sharing (company / restricted / public) |
+| **`kana app library`** `status` \| `promote` \| `unpromote` | Promote / re-promote / remove from the app library (libop) |
 | **`kana app a2a`** `status` \| `broadcast` \| `agents …` | A2A broadcast and linked agents |
 | **`kana app slack`** `status` \| `connect` \| `disconnect` | Slack workspace OAuth |
 | **`kana app schedule`** `list` \| `add` \| `mod` \| `del` \| `run` \| `system …` | Prompt + system schedules |
@@ -248,6 +249,26 @@ Access & Sharing (company / restricted / public).
 | **`--lib-private`** / **`--clear-lib-private`** | Library visibility (requires libop) |
 
 Switching to **public** without a stored wckey auto-generates one.
+
+### `kana app library` / `kana module library`
+
+Promote or re-promote an app/module to the **app library**, or remove it (libop only — same as the web “Promote to library” / “Update library (Re-promote)” / “Remove from library” actions).
+
+| Subcommand | Meaning |
+|------------|---------|
+| **`status`** | Whether the target is promoted (`public` / `private` / not promoted) and its **`libid`** |
+| **`promote`** | First promote or re-promote (refresh the library copy after **`kana publish`**). Aliases: **`re-promote`**, **`repromote`** |
+| **`unpromote`** | Remove from the library. Alias: **`remove`** |
+
+**`library promote` flags:**
+
+| Flag | Meaning |
+|------|---------|
+| **`--public`** / **`--private`** | Library visibility (first promote; also overrides on re-promote). Interactive menu if omitted and not **`--yes`** (defaults to public with **`--yes`**) |
+| **`--allow-schema-clashes`** | On re-promote, proceed even when installed copies would see destructive DB schema changes |
+| **`--yes`** / **`-y`** | Skip confirmation prompts (does **not** imply **`--allow-schema-clashes`**) |
+
+Targeting flags match other settings commands (**`--app-name`**, **`--app-id`**, **`--customer-id`**, …).
 
 ### `kana app a2a` / `kana module a2a`
 
