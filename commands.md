@@ -34,9 +34,9 @@ Then it prints **help** (available subcommands).
 | **`kana test clear`** | Clear the test environment database (**`./script/test clear`**) |
 | **`kana test reset`** | Reset the test environment database to the live database state (**`./script/test reset`**) |
 | **`kana app create`** `<name>` | Create app; sets **current app** |
-| **`kana app use`** `[name]` | Set **current app**; pick from **all** apps if name omitted; **clones** if there is no local checkout; with a checkout, offers **Codex** / **Claude CLI** / **VS Code** / **Cursor** / **skip** unless **`--yes`** |
+| **`kana app use`** `[name]` | Set **current app** (a main app or an extension); pick from **all** of them if name omitted; **clones** if there is no local checkout; with a checkout, offers **Codex** / **Claude CLI** / **VS Code** / **Cursor** / **skip** unless **`--yes`** |
 | **`kana app current`** | Print saved working app (friendly names) |
-| **`kana app list`** | List main apps by sidebar section |
+| **`kana app list`** | List main apps and their extensions by sidebar section |
 | **`kana app edit`** | Interactive: external auth, linked modules, MCP, managed DBs, features, billing, access, A2A |
 | **`kana app extern-auth`** `list` \| `add` \| `remove` | Non-interactive external OAuth integrations (type ids) |
 | **`kana app extern-module`** `list` \| `add` \| `remove` | Non-interactive linked modules (datasrc ids); alias: **`kana app module`** |
@@ -119,8 +119,8 @@ Creates an app through the same APIs as the web flow.
 
 Sets **`~/.kana/current-app.json`**. In Kana, each **orchestrator** row **is** the app (there are no separate “apps inside” another shell).
 
-- **Pick target:** With **no** **`[name]`** and no disambiguating flags, shows **all** main apps in the workspace in **one** numbered list. Each line notes whether there is already a **local checkout** under **`~/.kana/repos/`** or **no local checkout**.
-- **Name / ids:** Pass **`[name]`** or **`--app-name`**, or **`--app-id`** when that id is unique in the workspace (see scope flags).
+- **Pick target:** With **no** **`[name]`** and no disambiguating flags, shows **all** main apps and their **extensions** in the workspace in **one** numbered list. Extension lines are marked **`[extension]`** and name the app they extend. Each line notes whether there is already a **local checkout** under **`~/.kana/repos/`** or **no local checkout**.
+- **Name / ids:** Pass **`[name]`** or **`--app-name`** (an app or extension display name), or **`--app-id`** (the app or extension **widgetappid**) when that id is unique in the workspace (see scope flags). Selecting an extension clones that extension and makes it the current app, so **`init`**, **`push`**, and **`publish`** run against it.
 - **Clone:** If there is **no** local dev workspace for that app, the CLI asks whether to **clone** it (same **`clone_app.sh`** flow as create: a git clone of the app's repository on a branch named after your email). Declining still saves the **current app** id without **`localRepoPath`**. **`--yes`** / **`-y`** skips the question and clones non-interactively (and skips editor open prompts, same as **`app create --yes`**). After clone, the editor prompt below is offered; a terminal agent you pick there (**Claude CLI**, or **Codex** when no Codex desktop app is installed) opens in a **new** system terminal window, not the current shell.
 - **Editor prompt:** When you already have a **local checkout** for the app you picked, the CLI still offers **Codex**, **Claude CLI**, **VS Code**, **Cursor**, or **skip** (same as after a fresh clone), unless you passed **`--yes`** / **`-y`**.
 
@@ -132,7 +132,7 @@ Prints the current app (friendly names for display).
 
 ### `kana app list`
 
-Lists **main** apps (not modules), grouped by sidebar section. Each line shows whether the app is already **checked out** under **`~/.kana/repos/`** (or **`localRepoPath`**) or **no local checkout** yet.
+Lists **main** apps (not modules) and each app's **extensions**, grouped by sidebar section. Extension lines are marked **`[extension]`**. Each line shows whether the app is already **checked out** under **`~/.kana/repos/`** (or **`localRepoPath`**) or **no local checkout** yet.
 
 ### `kana app edit`
 

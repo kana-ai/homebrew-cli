@@ -123,7 +123,7 @@ kana app use
 kana module use
 ```
 
-With no name, the CLI lists **every** app or module in the workspace and whether you already have a **local checkout**. If you pick (or name) one that is **not** checked out, it **asks** whether to clone the dev workspace (same clone as create). If you pick one that **is** already checked out, it can offer **Codex** / **Claude CLI** / **VS Code** / **Cursor** / **skip** again. Use **`--yes`** to skip those prompts (clone without asking, and no editor offer after **`use`**).
+With no name, the CLI lists **every** app or module in the workspace — including **extensions** of those apps — and whether you already have a **local checkout**. Extension lines are marked **`[extension]`**. If you pick (or name) one that is **not** checked out, it **asks** whether to clone the dev workspace (same clone as create). If you pick one that **is** already checked out, it can offer **Codex** / **Claude CLI** / **VS Code** / **Cursor** / **skip** again. Use **`--yes`** to skip those prompts (clone without asking, and no editor offer after **`use`**). **`kana init`**, **`kana push`**, and **`kana publish`** then run against that extension the same way they do for a main app.
 
 You can pass a name: **`kana app use "My app name"`**. When several resources share a name, use **scope flags** — see [Scope flags](commands.md#scope-flags) in [commands.md](commands.md).
 
