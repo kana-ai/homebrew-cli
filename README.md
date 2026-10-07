@@ -75,6 +75,8 @@ kana auth
 
 Uses browser OAuth (scopes **`kana:read`** and **`kana:write`**). Tokens are stored under **`~/.kana/`** (see **Configuration files** in [commands.md](commands.md#configuration-files)).
 
+Over SSH, or on a machine without a display, `kana auth` prints a link instead of opening a browser: open it on any device, sign in, and paste the code shown back into the terminal. **`kana auth --no-browser`** asks for this explicitly.
+
 ### 2. Choose a workspace (customer)
 
 ```bash

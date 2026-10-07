@@ -68,6 +68,10 @@ Repo scripts require a **local clone** (a git repository, checked out on a branc
 
 Opens the browser for OAuth. Stores tokens in **`~/.kana/auth.json`**.
 
+| Flag | Meaning |
+|------|---------|
+| **`--no-browser`** | Print a sign-in link instead of opening a browser here; after signing in on any device, paste the code the page shows back into the terminal. Chosen automatically over SSH without a forwarded display, and on Linux/BSD with no display. **`--no-browser=false`** always opens the browser. gcloud’s spelling **`--no-launch-browser`** is accepted too. |
+
 ### `kana version`
 
 Prints the CLI version (release builds embed git metadata).
@@ -396,7 +400,7 @@ Stopping Docker is **best-effort**: if **`docker compose down`** fails, local fo
 
 ### `kana app delete` / `kana module delete`
 
-Same behavior; lets you name an app or module. With **`--remote`**, if that was the **only** app in its sidebar section, the CLI may remove the empty container server-side.
+Same behavior; lets you name an app or module. With **`--remote`**, if that is the **only** app in its sidebar section, the whole container is deleted server-side in one request. If Kana refuses (a module another app still uses, an app promoted to the library), nothing is deleted, the local clone is kept, and the command fails.
 
 ---
 
