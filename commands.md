@@ -321,7 +321,7 @@ These run executables under **`script/`** in your project root (**`~/.kana/repos
 
 ### `kana init`
 
-Starts or restarts the development environment for the **current** app or module by running **`./script/init`**. When signed in, refreshes **`.auth_token`** at the project root from the API where applicable.
+Starts or restarts the development environment for the **current** app or module by running **`./script/init`**. When signed in, refreshes **`.auth_token`** at the project root from the API where applicable, and starts the **token broker** daemon (see `kana daemon` below) so the dev container can renew that token after this machine sleeps without re-running init.
 
 **Optional targeting before init:**
 
@@ -332,6 +332,18 @@ Starts or restarts the development environment for the **current** app or module
 | **`--module <name>`** | Set **current module** by display name, then run **`./script/init`** |
 
 **`--app`** and **`--module`** are mutually exclusive. **`--customer-id`** applies when switching target.
+
+### `kana daemon`
+
+Manages the local **token broker**: a small background server that lets a dev container whose short-lived (30-minute) token expired while this machine was asleep mint a fresh one from the OAuth session stored on the host. Containers reach it at `http://host.docker.internal:<port>` and must present a per-workspace secret; the broker only ever returns the same short-lived credential bundle `kana init` writes, never an OAuth token.
+
+| Command | Meaning |
+|---------|---------|
+| **`kana daemon start`** | Start the broker if not already running (also runs automatically as part of `kana init`) |
+| **`kana daemon status`** | Show broker state, bind/port, and registered workspaces (never prints secrets) |
+| **`kana daemon stop`** | Stop the broker, unregister all workspaces, and strip their `KANA_TOKEN_BROKER_*` entries from their `.env` files |
+
+The broker is optional: without it (never installed, uninstalled, or stopped), workspaces behave exactly as before — `./script/init` re-authenticates in the browser when a token has expired. On Linux the broker listens on all interfaces so containers can reach it (the per-workspace secret is the access control; `KANA_BROKER_BIND` overrides the bind address).
 
 ### `kana push "<summary>"`
 
@@ -396,7 +408,7 @@ With **`--yes`**, you must either name the resource (positionals or scope flags)
 
 **Local-only delete** using the saved current target does **not** need **`kana customer`** / API — it uses **`~/.kana/current-*.json`** and removes **`~/.kana/repos/…`**.
 
-Stopping Docker is **best-effort**: if **`docker compose down`** fails, local folder removal (and **`--remote`**) may still proceed after a warning.
+Stopping Docker is **best-effort**: if **`docker compose down`** fails, local folder removal (and **`--remote`**) may still proceed after a warning. The app's containers, running or stopped, are found from the compose file Docker records on them (label **`com.docker.compose.project.config_files`**) and stopped with **`docker compose -p <project> down --remove-orphans`**; when none are found, the command warns that nothing was stopped.
 
 ### `kana app delete` / `kana module delete`
 
