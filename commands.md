@@ -356,6 +356,11 @@ Runs **`./script/push "<summary>"`** in the local clone: commits the working tre
 | **0** | Pushed and deployed |
 | **1** | Error (lint, build, upload, …) |
 | **6** | Your branch on the server has newer commits from another workspace (for example a web-hosted vibe-dev session): run **`kana sync_workspace`** to merge them, then push again |
+| **7** | The push was saved, but deploying it would delete data in your test environment: the report lists the tables and columns, and your test environment was not changed. Once you are sure that data can go, run **`kana push --allow_destructive_schema`** with the same summary |
+
+| Flag | Meaning |
+|------|---------|
+| **`--allow_destructive_schema`** | Forwarded as **`./script/push --allow_destructive_schema`**: let the deploy delete what an exit 7 listed in your test environment |
 
 **`--force`** is still accepted for compatibility but ignored (the CLI says so): pushes are never forced.
 
@@ -366,6 +371,7 @@ Runs **`./script/publish`** in the local clone: first the workspace sync (merges
 | Flag | Meaning |
 |------|---------|
 | **`--continue`** | Forwarded as **`./script/publish --continue`**: publish even when the sync merged new commits from **`main`** (skips the exit-4 stop below) |
+| **`--allow_destructive_schema`** | Forwarded as **`./script/publish --allow_destructive_schema`**: let the publish delete what an exit 7 listed in production. Production keeps its own data, so a confirmation for your test environment does not cover it |
 
 **Exit codes** (the script's own, passed through unchanged):
 
@@ -376,6 +382,7 @@ Runs **`./script/publish`** in the local clone: first the workspace sync (merges
 | **3** | Conflicts, either merging or putting your uncommitted changes back: the script's report lists the files and the exact `git` commands to finish, and says whether **`kana publish`** has to be run again |
 | **4** | Merged changes from **`main`** and deployed them to your test environment; verify, then run **`kana publish`** again (it publishes as long as **`main`** has not changed again) |
 | **5** | **`main`** changed since your sync; run **`kana publish`** again to merge the new commits |
+| **7** | Deploying would delete data, and nothing was changed: the report lists the tables and columns, and says where. In your test environment (the push before the publish was refused): once you are sure that data can go, run **`kana push --allow_destructive_schema`** with the same summary, then **`kana publish`** again, which checks production on its own. In production: once you are sure, run **`kana publish --allow_destructive_schema`** |
 
 ### `kana sync_workspace`
 
